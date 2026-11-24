@@ -5,4 +5,7 @@ REASONS = {
     'DUPLICATE': '同站同刻重复读数', 'SHADOWED': '同刻采用优先级更高的站',
     'OVER_GAP': '相邻有效读数间隔超过断面上限', 'NO_BRACKET': '断面缺少双侧读数',
     'UNDER_DEPTH': '至少一处断面低于放行水深', 'DEPTH_OK': '所有断面均达到放行水深',
+    'BAD_SPEED': '航速、下沉系数格式错误或越界', 'UNKNOWN_VESSEL': '航速表船期未登记',
+    'UNKNOWN_SECTION': '航速表断面未登记', 'DUPLICATE_SPEED': '同船同断面重复航速行',
+    'SQUAT_ADJUSTED': '已按航速计入船体下沉', 'STATIC_ONLY': '仅按申报吃水，未计下沉',
 }

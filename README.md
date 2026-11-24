@@ -1,6 +1,6 @@
 # 涨潮断面通行簿
 
-内河调度员用潮尺、站点基准和船期表核对放行时间。工作台默认打开断测场次，左侧可依次查看采信、测站归一、阈值交点、全程潮窗、船期覆盖、运行留档和证据签发。
+内河调度员用潮尺、站点基准和船期表核对放行时间。工作台默认打开断测场次，左侧可依次查看采信、测站归一、阈值交点、全程潮窗、船期覆盖、航速排程、运行留档和证据签发。
 
 ## 启动
 
@@ -14,9 +14,9 @@ docker compose up --build
 
 1. 首页选海棠17，核对 3000 秒窗口中的 1500 秒可行、900 秒不可行、600 秒缺证。
 2. 打开全程可行潮窗，查看放行起止、临界点和断面潮尺行。
-3. 打开运行留档，复算并保留原归档号，再到潮窗证据签发下载 JSON 或打印。
-4. 切换连续测站样例，海棠17的全部 3000 秒均可行。
+3. 打开航速排程：断测场次里海棠17 申报吃水看似够深，计入浅水下沉后需减速吃当前窗口；甬航05 保速改等下一趟高水；江桐62 等下一趟高水且只有减速可行。切换连续测站样例，全部保速即可。
+4. 打开运行留档，复算并保留原归档号，或补录迟到航速表重算（结论变化时新簿承接原簿，原簿仍可回查当时速度与潮窗），再到潮窗证据签发下载 JSON 或打印。
 
-`GET /api/stage/{readings,datum,crossings,windows,coverage}` 可查看样例阶段结果。对同路径执行 POST 可提交 `{"sources":{"observations":"...","stations":"...","vessels":"..."}}`。`POST /api/journal` 接受同一输入或 `{"sample":"dirty"}`。`GET /api/journal/<id>` 查归档，`POST /api/journal/<id>/rerun` 复算，`GET /api/export/<id>` 下载证据。
+`GET /api/stage/{readings,datum,crossings,windows,coverage,plan}` 可查看样例阶段结果。对同路径执行 POST 可提交 `{"sources":{"observations":"...","stations":"...","vessels":"...","speeds":"..."}}`（航速表可选）。`POST /api/journal` 接受同一输入或 `{"sample":"dirty"}`。`GET /api/journal/<id>` 查归档，`POST /api/journal/<id>/rerun` 复算（可带 `{"speeds":"..."}` 补录重算），`GET /api/export/<id>` 下载证据。
 
 字段见 [数据字典](docs/DATA-DICTIONARY.md)，规则与回归见 [深度登记](docs/DEPTH.md)。本机运行 `python -m pytest -q`。

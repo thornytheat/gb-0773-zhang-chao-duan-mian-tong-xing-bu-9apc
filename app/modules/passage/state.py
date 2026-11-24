@@ -3,16 +3,22 @@ from fractions import Fraction
 
 
 class SectionClock:
+    """A section's depth series expressed in departure time. ``threshold_m`` optionally pins a
+    per-section requirement (used by speed plans, where squat makes the threshold speed-specific)."""
+
     def __init__(self, name, section):
         self.name, self.offset = name, section['offset_s']
         self.points, self.bands = section['points'], section['bands']
         self.times = [point['time'] for point in self.points]
+        self.threshold = Fraction(section['threshold_m']) if section.get('threshold_m') is not None else None
 
     def boundaries(self):
         yield from (time - self.offset for time in self.times)
         yield from (Fraction(band['crossing']) - self.offset for band in self.bands if band['crossing'] is not None)
 
     def at(self, departure, threshold):
+        if self.threshold is not None:
+            threshold = self.threshold
         time = departure + self.offset
         index = bisect_left(self.times, time)
         detail = {'section': self.name, 'at': str(time), 'depth_m': None, 'lines': []}

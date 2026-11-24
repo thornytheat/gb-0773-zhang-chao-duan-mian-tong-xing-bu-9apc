@@ -7,7 +7,7 @@ from app.modules.journal.store import Journal
 
 def test_receipt(client):
     response = client.post('/api/journal',json={'sample':'dirty'})
-    assert response.status_code == 201 and response.json['manifest']['rule_version']=='tide-1.0'
+    assert response.status_code == 201 and response.json['manifest']['rule_version']=='tide-1.1'
 
 
 def test_replay(client):

@@ -6,7 +6,7 @@ from app.api import journal
 from app.clock import instant
 from app.config import RULES
 from app.errors import TideError
-from app.flow import calculate
+from app.flow import calculate, view
 from app.modules.journal.service import record
 from app.modules.proof.service import issue
 from app.reasons import REASONS
@@ -14,8 +14,11 @@ from app.source import load_sources
 
 web = Blueprint('tide_desk', __name__)
 CHAPTERS = {'coverage': '船期覆盖勾稽', 'readings': '潮尺读数采信', 'datum': '站点基准统一',
-            'crossings': '水位阈值交点', 'windows': '全程可行潮窗', 'journal': '运行留档', 'proof': '潮窗证据签发'}
+            'crossings': '水位阈值交点', 'windows': '全程可行潮窗', 'plan': '航速排程',
+            'journal': '运行留档', 'proof': '潮窗证据签发'}
 STATES = {'open': '可行', 'blocked': '不可行', 'unknown': '缺证'}
+DECISIONS = {'keep': '保速赶当前潮窗', 'slow': '减速吃当前窗口',
+             'wait': '等下一趟高水', 'unknown': '缺航速证据'}
 
 
 @web.get('/')
@@ -28,16 +31,19 @@ def desk(chapter='coverage'):
     if key or chapter in ('journal', 'proof'):
         key = key or record(journal(), load_sources({'sample': sample}))['run_id']
         receipt, sources, reports = journal().get(key)
+        derived = view(reports)
     else:
         sources = load_sources({'sample': sample})
         reports = calculate(sources)
+        derived = reports
         receipt = None
     vessel = request.args.get('vessel', next(iter(reports['coverage']['ships'])))
     if vessel not in reports['coverage']['ships']:
         raise TideError('NO_VESSEL', '找不到该船期', 404)
-    proof = issue(receipt, sources, reports) if chapter == 'proof' else None
+    proof = issue(receipt, sources, reports, derived) if chapter == 'proof' else None
     return render_template('base.html', chapter=chapter, chapters=CHAPTERS, states=STATES, sample=sample,
-                           receipt=receipt, key=key, reports=reports, vessel=vessel, reason=REASONS,
+                           receipt=receipt, key=key, reports=derived, vessel=vessel, reason=REASONS,
+                           decisions=DECISIONS,
                            gauge_fill=min(100, float(Fraction(reports['windows'][vessel]['order']['threshold_m'])) * 25),
                            seal=proof['seal_sha256'] if proof else None, time=instant, rule=RULES,
                            history=journal().list() if chapter == 'journal' else [])
